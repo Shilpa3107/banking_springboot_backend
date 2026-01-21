@@ -1,0 +1,82 @@
+package com.bank.entity;
+ 
+
+import jakarta.persistence.*;
+import java.time.Instant;
+
+@Entity
+@Table(name = "accounts")
+public class Account {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "holder_name", nullable = false)
+    private String holderName;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false)
+    private Double balance = 0.0;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    public Account() {}
+
+    public Account(String holderName, String email, Double balance) {
+        this.holderName = holderName;
+        this.email = email;
+        this.balance = balance == null ? 0.0 : balance;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = Instant.now();
+    }
+    
+    
+    @Column(name = "last_alert_at")
+    private Instant lastAlertAt;
+
+    @Column(name = "alert_count")
+    private Integer alertCount = 0;
+
+    public Instant getLastAlertAt() { 
+    		return lastAlertAt; 
+    	}
+    public void setLastAlertAt(Instant lastAlertAt) { 
+    	 this.lastAlertAt = lastAlertAt;
+    	}
+
+    public Integer getAlertCount() {
+        if (alertCount == null) {
+            alertCount = 0; // fix null values
+        }
+        return alertCount;
+    }
+
+    public void setAlertCount(Integer alertCount) {
+        this.alertCount = (alertCount == null ? 0 : alertCount);
+    }
+
+
+
+    // Getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getHolderName() { return holderName; }
+    public void setHolderName(String holderName) { this.holderName = holderName; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public Double getBalance() { return balance; }
+    public void setBalance(Double balance) { this.balance = balance; }
+
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+}
