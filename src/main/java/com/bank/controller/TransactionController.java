@@ -15,8 +15,8 @@ import com.bank.entity.Transaction;
 import com.bank.service.TransactionService;
 
 @RestController
-@RequestMapping("/api/transactions")
-@CrossOrigin("*") // allow React frontend
+@RequestMapping("/transactions")
+@CrossOrigin("*") 
 public class TransactionController {
 
     private final TransactionService transactionService;
@@ -27,41 +27,42 @@ public class TransactionController {
 
     // ---------------------------
     // Deposit
-    // POST: /api/transactions/deposit
+    // POST: /transactions/deposite
     // ---------------------------
-    @PostMapping("/deposit")
-    public Transaction deposit(@RequestParam Long accountId,
-                               @RequestParam Double amount) {
-        return transactionService.deposit(accountId, amount);
+    @PostMapping("/deposite")
+    public String deposit(@RequestBody TxRequest data) {
+         transactionService.deposit(data.accNo, data.amount);
+         return "Deposite successfully..!";
     }
 
     // ---------------------------
     // Withdraw
-    // POST: /api/transactions/withdraw
+    // POST: /transactions/withdraw
     // ---------------------------
     @PostMapping("/withdraw")
-    public Transaction withdraw(@RequestParam Long accountId,
-                                @RequestParam Double amount) {
-        return transactionService.withdraw(accountId, amount);
+    public String withdraw(@RequestBody TxRequest data) {
+        transactionService.withdraw(data.accNo, data.amount);
+        return "Withdraw successfully..!";
     }
 
     // ---------------------------
     // Transfer
-    // POST: /api/transactions/transfer
+    // POST: /transactions/transfer
     // ---------------------------
     @PostMapping("/transfer")
-    public String transfer(@RequestParam Long fromAccountId,
-                           @RequestParam Long toAccountId,
-                           @RequestParam Double amount) {
-        return transactionService.transfer(fromAccountId, toAccountId, amount);
+    public String transfer(@RequestBody TransferRequest data) {
+        return transactionService.transfer(data.fromAcc, data.toAcc, data.amount);
     }
 
-    // ---------------------------
-    // Transaction History
-    // GET: /api/transactions/history/{accountId}
-    // ---------------------------
-    @GetMapping("/history/{accountId}")
-    public List<Transaction> getHistory(@PathVariable Long accountId) {
-        return transactionService.getTransactionsByAccount(accountId);
+    // DTOs for compatibility
+    static class TxRequest {
+        public String accNo;
+        public Double amount;
+    }
+
+    static class TransferRequest {
+        public String fromAcc;
+        public String toAcc;
+        public Double amount;
     }
 }

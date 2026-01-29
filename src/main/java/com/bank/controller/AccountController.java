@@ -16,8 +16,8 @@ import com.bank.entity.Account;
 import com.bank.service.AccountService;
 
 @RestController
-@RequestMapping("/api/accounts")
-@CrossOrigin("*")   // allow frontend to access (React)
+@RequestMapping("/accounts")
+@CrossOrigin("*") 
 public class AccountController {
 
     private final AccountService accountService;
@@ -27,59 +27,56 @@ public class AccountController {
     }
 
     // ---------------------------
-    // Create Account
-    // POST: /api/accounts
+    // Signup (Create Account)
+    // POST: /accounts/create
     // ---------------------------
-    @PostMapping
-    public Account createAccount(@RequestBody Account account) {
+    @PostMapping("/create")
+    public Account createAccount(@RequestBody AccountRequest data) {
         return accountService.createAccount(
-                account.getHolderName(),
-                account.getEmail(),
-                account.getBalance()
+                data.name,
+                data.email,
+                data.balance,
+                data.password
         );
     }
 
     // ---------------------------
-    // Get Account By ID
-    // GET: /api/accounts/{id}
+    // Login
+    // POST: /accounts/login
     // ---------------------------
-    @GetMapping("/{id}")
-    public Account getAccount(@PathVariable Long id) {
-        return accountService.getAccountById(id);
+    @PostMapping("/login")
+    public Account login(@RequestBody LoginRequest data) {
+        return accountService.login(data.identifier, data.password);
+    }
+
+    // ---------------------------
+    // Get Account By Number
+    // GET: /accounts/{accNo}
+    // ---------------------------
+    @GetMapping("/{accNo}")
+    public Account getAccount(@PathVariable String accNo) {
+        return accountService.getAccountByNumber(accNo);
     }
 
     // ---------------------------
     // List All Accounts
-    // GET: /api/accounts
+    // GET: /accounts/all
     // ---------------------------
-    @GetMapping
+    @GetMapping("/all")
     public List<Account> getAllAccounts() {
         return accountService.getAllAccounts();
     }
 
-    // ---------------------------
-    // Update Account
-    // PUT: /api/accounts/{id}
-    // ---------------------------
-    @PutMapping("/{id}")
-    public Account updateAccount(
-            @PathVariable Long id,
-            @RequestBody Account account) {
-
-        return accountService.updateAccount(
-                id,
-                account.getHolderName(),
-                account.getEmail()
-        );
+    // DTO for compatibility
+    static class AccountRequest {
+        public String name;
+        public String email;
+        public Double balance;
+        public String password;
     }
 
-    // ---------------------------
-    // Delete Account
-    // DELETE: /api/accounts/{id}
-    // ---------------------------
-    @DeleteMapping("/{id}")
-    public String deleteAccount(@PathVariable Long id) {
-        accountService.deleteAccount(id);
-        return "Account deleted successfully";
+    static class LoginRequest {
+        public String identifier;
+        public String password;
     }
 }

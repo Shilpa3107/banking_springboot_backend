@@ -16,34 +16,40 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 
+import com.bank.entity.Account;
 import com.bank.entity.Transaction;
+import com.bank.service.AccountService;
 import com.bank.service.TransactionService;
 
 @RestController
-@RequestMapping("/api/reports")
+@RequestMapping("/reports")
 @CrossOrigin("*")
 public class ReportController {
 
     private final TransactionService transactionService;
+    private final AccountService accountService;
 
-    public ReportController(TransactionService transactionService) {
+    public ReportController(TransactionService transactionService, AccountService accountService) {
         this.transactionService = transactionService;
+        this.accountService = accountService;
     }
 
     // -----------------------------------------
     // Download transaction report as .txt file
-    // GET: /api/reports/account/{id}/transactions
+    // GET: /reports/account/{accNo}/transactions
     // -----------------------------------------
-    @GetMapping("/account/{id}/transactions")
-    public ResponseEntity<ByteArrayResource> downloadReport(@PathVariable Long id) {
+    @GetMapping("/account/{accNo}/transactions")
+    public ResponseEntity<ByteArrayResource> downloadReport(@PathVariable String accNo) {
 
-        var transactions = transactionService.getTransactionsByAccount(id);
+        Account acc = accountService.getAccountByNumber(accNo);
+        var transactions = transactionService.getTransactionsByAccount(acc.getId());
 
         // Format the report content
         StringBuilder sb = new StringBuilder();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        sb.append("Transaction Report for Account ID: ").append(id).append("\n");
+        sb.append("Transaction Report for Account Number: ").append(accNo).append("\n");
+        sb.append("Holder Name: ").append(acc.getHolderName()).append("\n");
         sb.append("--------------------------------------------------\n\n");
 
         for (Transaction tx : transactions) {
@@ -67,7 +73,7 @@ public class ReportController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=transaction-report-account-" + id + ".txt")
+                        "attachment; filename=transaction-report-account-" + accNo + ".txt")
                 .contentType(MediaType.TEXT_PLAIN)
                 .contentLength(bytes.length)
                 .body(resource);
